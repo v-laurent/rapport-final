@@ -197,12 +197,46 @@ Cependant, si nous utilisions l'algorithme directement, on n'aurait pas le résu
 \label{IoU}
 \end{figure}
 
-Ainsi, on comprend que plus la métrique est proche de 1, plus les deux boites sont similaires. La méthode \textbf{Non Max Suppression} exploite ce principe de la manière suivante:
+Ainsi, on comprend que plus la métrique est proche de 1, plus les deux boites sont similaires. La méthode \textbf{Non Max Suppression} exploite ce principe. Premièrement, on choisit la boite englobante avec la plus grande probabilité de contenir un objet. Pour toutes les autres, on calcule l'IoU avec la boite référente et si celui-ci est supérieur à 0.5, on supprime la boite correspondante. Enfin, on répète le processus jusqu'à ce qu'il n'y ait plus de boite avec un IoU supérieur à 0.5 avec une autre boite. La figure \ref{non_max_suppression} montre les résultats d'une telle méthode.
 
-Tant que 
-\begin{itemize}
-\item On choisit la boite englobante avec la plus grande probabilité de contenir un objet
-\item Pour toutes les autres, on calcule l'IoU avec la boite référente
-et si IoU > 0.5, on supprime la boite correspondante
-\item On répète le processus jusqu'à ce qu'il n'y ait plus de boite avec un IoU avec une autre supérieur à 0.5.
-\end{itemize}
+\begin{figure}[!h]
+\centering
+\includegraphics[width=200pts]{images/Mask_R_CNN/non_max_suppression.png} 
+\caption{effet de la méthode Non Max Suppression : on observe que toutes les boites englobantes redondantes ont été supprimées au profit de celle qui a la plus grande probabilité de contenir l'objet.}
+\label{non_max_suppression}
+\end{figure}
+
+\section{La gestion des masques}
+
+La gestion des masques a été rajoutée après l'apparition des faster R-CNN, pour donner naissance au Mask R-CNN. La structure globale reste rigoureusement la même, on rajoute juste un réseau de couches de convolutions et déconvolutions supplémentaires à la sortie des cartes de caractéristiques. La figure \ref{Structure_Mask_R_CNN} résume l'architecture d'un Mask R-CNN.
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=200pts]{images/Mask_R_CNN/structure_Mask_R_CNN.png} 
+\caption{Structure d'un Mask R-CNN}
+\label{Structure_Mask_R_CNN}
+\end{figure}
+
+Le réseau supplémentaire s'occupe de trouver pour chaque classe un masque $28 \times 28$ qu'il suffit après d'agrandir par déconvolution.
+La figure \ref{masks} montre les résultats de ce réseau additionnel.
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=200pts]{images/Mask_R_CNN/masks.png} 
+\caption{à gauche : sortie du réseau gérant les masques $28 \times 28$ ; à droite, le masque reconstruit à la bonne échelle}
+\label{masks}
+\end{figure}
+
+De la même manière, on rajoute à la fonction de coût précédente un nouveau terme gérant l'adéquation des masques avec la réalité :
+
+$$\mathcal{L}_{tot} = \mathcal{L}_{classes} + \mathcal{L}_{boxes} + \mathcal{L}_{masks}$$ 
+où 
+$$\mathcal{L}_{masks} = -\frac{1}{m^2} \sum_k \sum_{1 \leq i,j \leq m} \hat{p}^k_{i,j}[ \hat{y}^k_{i,j} log(y^k_{i,j} + (1-y^k_{i,j}) log(1-\hat{y}^k_{i,j})]$$
+
+Avec \\
+\\
+$m = 28$ : taille des masques \\
+$y^k_{i,j}$ :supérieur à 0 si le pixel i,j appartient au masque prédit de classe k, 0 sinon \\
+$y^k_{i,j}$ : supérieur à 0 si le pixel i,j appartient au masque réel de classe k, 0 sinon (ground truth)\\ 
+\\
+On remarque que cette fonction de coût ne prend en compte que le masque généré pour l'objet réellement présent dans la boite, et ne considère pas les autres. Ensuite elle se contente de faire une comparaison termes à termes des pixels en passant par une cross-entropie.
