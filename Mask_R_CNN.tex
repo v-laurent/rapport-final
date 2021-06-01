@@ -2,21 +2,29 @@
 
 \chapter{Mask R-CNN}
 
+\section{Fonctionnement d'un Mask R-CNN}
 
-\section{Introduction}
+\subsection{Introduction}
 
-La première partie de ce nouveau projet consistait à détecter toutes les formes humaines présentes sur une image. Malheureusement, une simple structure de CNN ne suffit pas pour effectuer cette tâche. En effet, plusieurs difficultés gênent son bon fonctionnement : l'image n'est pas forcément cadrée pour contenir exactement l'objet que le CNN est sensé détecter, celui-ci ne donne aucune indication quant à la position de cet objet dans l'image ni même ses contours. Une nouvelle architecture a donc dû être utilisée: les \textbf{Mask R-CNN}.
+La première partie de ce nouveau projet consistait à détecter toutes les formes humaines présentes sur une image. Malheureusement, une simple structure de CNN ne suffit pas pour effectuer cette tâche. En effet, plusieurs difficultés gênent son bon fonctionnement : l'image n'est pas forcément cadrée pour contenir exactement l'objet que le CNN est sensé détecter, celui-ci ne donne aucune indication quant à la position de cet objet dans l'image ni même ses contours. Une nouvelle architecture a donc dû être utilisée: les \textbf{Mask R-CNN}. La figure \ref{result_mask_r_cnn} montre ce que l'on peut obtenir avec une telle architecture.
 
-\section{Présentation générale}
+\begin{figure}[!h]
+\centering
+\includegraphics[width=200pts]{images/Mask_R_CNN/mask_r_cnn.png} 
+\caption{Exemple de résultats obtenus avec un Mask R-CNN}
+\label{result_mask_r_cnn}
+\end{figure}
+
+\subsection{Présentation générale}
 
 Les Mask R-CNN ont fait leur apparition en 2017 [insérer ref Mask-r-cnn], sous l'impulsion d'une équipe de chercheurs de Facebook. La technique s'est rapidement démocratisée pour aujourd'hui devenir un incontournable de la segmentation d'images. Le principe directeur est le suivant :
  \begin{itemize}
 \item Extraction des caractéristiques sémantiques de l'image
 \item Traitement pour gérer la taille des objets : FPN (Feature Pyramid Network)
 \item Proposition de régions contenant des objets :RPN (Region Proposal Network)
-\item Suppression des régions redondantes : Non Max Suppression
 \item Redimensionnement des régions : ROI Align
 \item Réseau donnant la classe d'objets de chaque région et leur redimensionnement
+\item Suppression des régions redondantes : Non Max Suppression
 \item Réseau donnant les masques
 \end{itemize}
 
@@ -31,7 +39,7 @@ A titre d'information, la figure \ref{R_CNN_structure} résume sommairement la s
 
 
 
-\section{Extraction des caractéristiques sémantiques de l'image}
+\subsection{Extraction des caractéristiques sémantiques de l'image}
 
 Les Mask R-CNN reposent sur une structure de Faster R-CNN, architecture qui permet de donner les boîtes englobantes (bounding box) ainsi que la classe de l'objet compris dedans. Celle-ci est plus rapide (faster) qu'un R-CNN basique dans la mesure où elle ne procède qu'une seule fois à l'extraction des caractéristiques. Ainsi, on fait passer l'image d'entrée par un réseau à couches de convolutions tel que ResNet et on extrait les dernières afin d'avoir une carte des caractéristiques de l'image, nous donnant in fine une compréhension sémantique de celle-ci.
 
@@ -42,7 +50,7 @@ Les Mask R-CNN reposent sur une structure de Faster R-CNN, architecture qui perm
 \label{resnet_extraction}
 \end{figure}
 
-\section{Region Proposal Network}
+\subsection{Region Proposal Network}
 
 L'étape suivante consiste à proposer des régions d'intérêt (ROI : Region of Interest) afin de déceler au mieux les objets présents sur l'image. Pour cela, l'algorithme se base sur des formes prédéfinies, les \textbf{anchors}. En effet, il est raisonnable de supposer que les objets que nous cherchons à détecter ont globalement tous des boîtes englobantes qui sont des formes suivantes : carrés plus ou moins grands, rectangles horizontaux ou verticaux eux aussi plus ou moins grands. Il faut bien comprendre ici que l'hypothèse de fait sur le ratio de ces boîtes (par exemple au pire 1 pour 3). Un exemple est montré sur la figure \ref{anchors}.
 
@@ -62,7 +70,7 @@ A partir de cette ensemble défini arbitrairement, il suffit de faire un quadril
 \label{proposed_anchors}
 \end{figure}
 
-\section{Feature Pyramid Network}
+\subsection{Feature Pyramid Network}
 
 L'un des grand avantages du Mask R-CNN repose dans la structure de Feature Pyramid Network (FPN). Tout part de la constatation que la détection des objets se fait beaucoup plus facilement avec des cartes de caractéristiques dont la compréhension sémantique est grande. Malheureusement, celles-ci sont de petites tailles, ce qui pose problème pour le bon placement des régions d'intérêt, car plus l'image est comprimée, plus on perd d'informations sur la disposition précise des objets sur l'image non compressée. L'astuce a alors été de créer une structure pyramidale, où chaque étage correspond à une carte des caractéristiques (extraite dans le ResNet), de plus en plus petite au fur et à mesure que le numéro de l'étage augmente. Le principe est illustré sur la figure \ref{FPN_1}.
 
@@ -95,11 +103,11 @@ Il suffit alors de prendre l'étage k, où l'étage 0 correspond à celui de plu
 \\
 Une fois cette étape passée, il suffit de garder la région d'intérêt si et seulement si le réseau considère qu'elle contient un objet.
 
-\section{Phase de Pooling}
+\subsection{Phase de Pooling}
 
 Ensuite, à partir des régions d'intérêt proposées par le RPN, il faut pouvoir extraire la partie de l'image correspondante sur la carte des caractéristiques choisie, ce qui pose problème dans la mesure où celle-ci est plus petite que l'image originelle. Pour cela, une première technique naïve a été mise en oeuvre : Le \textbf{ROI pooling}. 
 
-\subsection{ROI Pooling}
+\subsubsection{ROI Pooling}
 
 Cette méthode consiste à diviser les dimensions de la région d'intérêt  et sa position par le nombre de fois que la carte des caractéristiques   a été réduite par rapport à l'image originelle. Par exemple, si la carte est au niveau 2 de la pyramide de la méthode FPN, elle est 4 fois plus petite que l'image, et donc on réduit par 4 la région d'intérêt. Malheureusement, les grandeurs résultantes ne sont pas forcément entières, ce qui force la méthode à prendre la partie entière du résultat. Un exemple de fonctionnement est montré figure \ref{ROI_Pooling}.
 
@@ -121,7 +129,7 @@ Cependant, les chercheurs se sont rendus compte que cela posait un problème. En
 
 Une nouvelle méthode est alors naturellement apparue pour contrer ce phénomène : le \textbf{ROI Align}.
 
-\subsection{ROI Align}
+\subsubsection{ROI Align}
 
 la méthode ROI Align fonctionne de la même manière que ROI Pooling à l'exception que celle-ci garde les valeurs réelles des nouvelles positions, ce qui la pousse à procéder à un traitement supplémentaire pour prendre en compte les parties fractionnaires.\\
 En effet, une cellule du résultat final va ici représenter les différentes cellules qu'elle est sensée représenter par une méthode d'interpolation bilinéaire. La figure \ref{ROI_Align} explique graphiquement ce mécanisme.
@@ -135,7 +143,7 @@ En effet, une cellule du résultat final va ici représenter les différentes ce
 
 Ainsi, grâce à cette méthode, les problèmes liés à la division en partie entière disparaissent, et on observe bien en pratique des rendus bien meilleurs pour les masques avec le ROI Align comparativement au ROI Pooling.
 
-\section{Classification et réglage des boites englobantes}
+\subsection{Classification et réglage des boites englobantes}
 
 Une fois que l'on a toutes les régions d'intérêt avec pour chacune d'elles la partie de la carte des caractéristiques correspondante, il suffit de les faire passer par un réseau dense (fully connected layers) afin de prédire et la classe de l'objet contenu dans la région, et pour chacune des classes les ajustements à produire sur cette région afin d'obtenir la boite englobante la plus pertinente. Par exemple, si on a K classes, la sortie sera de dimension K+1 (en comptant l'objet background) + 4 * K (où le 4 correspond au nombre de données d'ajustement de la boîte). De plus, on se doute bien que les anchors n'ont pas parfaitement la forme adéquate, et le réseau s'occupe lui-même de trouver numériquement comment modifier cette région. \\
 \\
@@ -186,7 +194,7 @@ On remarque que cette fonction de coût est divisée en deux parties : la premi�
 \label{L1_smooth}
 \end{figure}
 
-\section{Non Max Suppression}
+\subsection{Non Max Suppression}
 
 Cependant, si nous utilisions l'algorithme directement, on n'aurait pas le résultat attendu. En effet, nous aurions beaucoup trop de boites englobantes pour un même objet. Actuellement, rien n'oblige un objet a avoir une multitude de boites englobantes. La méthode \textbf{Non Max Suppression} s'attelle à corriger ce problème en éliminant toutes les boites redondantes. Pour cela elle se base sur une métrique classique en traitement d'image : l'\textbf{IoU} (Intersection over Union). Celle-ci mesure simplement à quel point deux rectangles sont proches d'un point de vue spatial l'un de l'autre. La figure \ref{IoU} exprime graphiquement le calcul de cette métrique.
 
@@ -206,7 +214,7 @@ Ainsi, on comprend que plus la métrique est proche de 1, plus les deux boites s
 \label{non_max_suppression}
 \end{figure}
 
-\section{La gestion des masques}
+\subsection{La gestion des masques}
 
 La gestion des masques a été rajoutée après l'apparition des faster R-CNN, pour donner naissance au Mask R-CNN. La structure globale reste rigoureusement la même, on rajoute juste un réseau de couches de convolutions et déconvolutions supplémentaires à la sortie des cartes de caractéristiques. La figure \ref{Structure_Mask_R_CNN} résume l'architecture d'un Mask R-CNN.
 
@@ -240,3 +248,26 @@ $y^k_{i,j}$ :supérieur à 0 si le pixel i,j appartient au masque prédit de cla
 $y^k_{i,j}$ : supérieur à 0 si le pixel i,j appartient au masque réel de classe k, 0 sinon (ground truth)\\ 
 \\
 On remarque que cette fonction de coût ne prend en compte que le masque généré pour l'objet réellement présent dans la boite, et ne considère pas les autres. Ensuite elle se contente de faire une comparaison termes à termes des pixels en passant par une cross-entropie.
+
+\section{Implémentation et Résultats}
+
+\subsection{Implementation}
+
+Le codage en tant que tel d'un Mask R-CNN est long et fastidieux, nous avons décidé de réutiliser une version déjà codée et pré-entrainée disponible sur le dépôt git suivant : \url{https://github.com/akTwelve/Mask_RCNN}. Notons quelques légères difficultés d'utilisation : le modèle est codé avec la librairie TensorFlow 1 et certaines mises à jour du code ont dues être faites. \\
+De plus, nous avons eu besoin de rajouter la gestion de masques binaires afin d'enlever totalement les personnes des images. Nous présentons les résultats dans la partie suivante.
+
+\subsection{Résultats}
+
+Les résultats semblent totalement cohérents avec ce que l'on attendait. Les figures suivantes présentent quelques-uns d'entre eux.
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=200pts]{images/Mask_R_CNN/resultats_masks_1.png} 
+\caption{à gauche : image originelle ; à droite : image dont les personnes ont été enlevées}
+\end{figure}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=200pts]{images/Mask_R_CNN/resultats_masks_2.png} 
+\caption{à gauche : image originelle ; à droite : image dont les personnes ont été enlevées}
+\end{figure}
