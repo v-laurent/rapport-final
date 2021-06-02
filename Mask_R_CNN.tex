@@ -17,7 +17,7 @@ La première partie de ce nouveau projet consistait à détecter toutes les form
 
 \subsection{Présentation générale}
 
-Les Mask R-CNN ont fait leur apparition en 2017 [insérer ref Mask-r-cnn], sous l'impulsion d'une équipe de chercheurs de Facebook. La technique s'est rapidement démocratisée pour aujourd'hui devenir un incontournable de la segmentation d'images. Le principe directeur est le suivant :
+Les Mask R-CNN ont fait leur apparition en 2017, sous l'impulsion d'une équipe de chercheurs de Facebook. La technique s'est rapidement démocratisée pour aujourd'hui devenir un incontournable de la segmentation d'images. Le principe directeur est le suivant :
  \begin{itemize}
 \item Extraction des caractéristiques sémantiques de l'image
 \item Traitement pour gérer la taille des objets : FPN (Feature Pyramid Network)
@@ -52,7 +52,7 @@ Les Mask R-CNN reposent sur une structure de Faster R-CNN, architecture qui perm
 
 \subsection{Region Proposal Network}
 
-L'étape suivante consiste à proposer des régions d'intérêt (ROI : Region of Interest) afin de déceler au mieux les objets présents sur l'image. Pour cela, l'algorithme se base sur des formes prédéfinies, les \textbf{anchors}. En effet, il est raisonnable de supposer que les objets que nous cherchons à détecter ont globalement tous des boîtes englobantes qui sont des formes suivantes : carrés plus ou moins grands, rectangles horizontaux ou verticaux eux aussi plus ou moins grands. Il faut bien comprendre ici que l'hypothèse de fait sur le ratio de ces boîtes (par exemple au pire 1 pour 3). Un exemple est montré sur la figure \ref{anchors}.
+L'étape suivante consiste à proposer des régions d'intérêt (ROI : Region of Interest) afin de déceler au mieux les objets présents sur l'image. Pour cela, l'algorithme se base sur des formes prédéfinies, les \textbf{anchors}. En effet, il est raisonnable de supposer que les objets que nous cherchons à détecter ont globalement tous des boîtes englobantes qui sont des formes suivantes : carrés plus ou moins grands, rectangles horizontaux ou verticaux eux aussi plus ou moins grands. Il faut bien comprendre ici que l'hypothèse se fait sur le ratio de ces boîtes (par exemple au pire 1 pour 3). Un exemple est montré sur la figure \ref{anchors}.
 
 \begin{figure}[!h]
 \centering
