@@ -1,0 +1,19 @@
+\chapter{Image Inpainting}
+
+\section{Présentation du problème}
+
+L'inpainting désigne la reconstruction d'images détériorées. Le cas le plus souvent étudié est celui de parties manquantes de l'image qu'il va falloir remplir de la manière la plus plausible possible.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=200pt,valign=t]{EXEMPLE IMAGE TROU}
+    \caption{Exemple d'image détériorée ainsi que son originale que le réseau va devoir approcher.}
+\end{figure}
+
+Ce problème trouve plusieurs applications concrètes : la restauration d'oeuvres d'arts anciennes, la retouche d'images pour retirer des objets dans le décor sont les plus évidentes, mais on peut également l'utiliser afin d'augmenter la résolution d'une image. En effet, en dilatant l'image et en laissant des trous entre les pixels, le remplissage desdits trous revient à de l'inpainting.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=200pt,valign=t]{Exemple augmentation résolution}
+    \caption{Exemple d'image détériorée ainsi que son originale que le réseau va devoir approcher.}
+\end{figure}
