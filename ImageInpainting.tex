@@ -25,26 +25,26 @@ La formule donnant la sortie $y$ de la convolution partielle est alors :
         \end{array}
         \right.
 \end{equation}
-Ainsi la convolution n'a lieu que sur les pixels où on peut obtenir une valeur grâce à l'apport d'information des pixels alentours. On évite donc les dérives liés au biais. On remplace donc cela dans la traditionnelle couche de convolution et on fait se déplacer le centre. Cette formule permet alors de réduire le masque. En effet, le masque vaudra pour la prochaine étape de convolution 0 si et seulement si on a y=0.\\
-Dans le cas d'une vrai image, seul le coeur du masque peut se retrouver suffisamment éloigné de tout pixel porteur d'information pour que la convolution renvoie 0. On peut donc progressivement en appliquant plusieurs étapes de convolution partielle arriver à des features sans trou. On peut donc remplir l'image et ce quelle que soit la forme du trou ! Cependant on peut se rendre compte dès maintenant que l'on va voir plus de mal à approximer quelques trous larges que beaucoup de trous fins comme dans l'amélioration de la résolution.
+Ainsi la convolution n'a lieu que sur les pixels où on peut obtenir une valeur grâce à l'apport d'information des pixels alentours. On évite donc les dérives liées au biais. On remplace donc cela dans la traditionnelle couche de convolution et on fait se déplacer le centre. Cette formule permet alors de réduire le masque. En effet, le masque vaudra pour la prochaine étape de convolution 0 si et seulement si on a y=0.\\
+Dans le cas d'une vraie image, seul le coeur du masque peut se retrouver suffisamment éloigné de tout pixel porteur d'information pour que la convolution renvoie 0. On peut donc progressivement en appliquant plusieurs étapes de convolution partielle arriver à des features sans trou. On peut donc remplir l'image et ce quelle que soit la forme du trou ! Cependant on peut se rendre compte dès maintenant que l'on va voir plus de mal à approximer quelques trous larges que beaucoup de trous fins comme dans l'amélioration de la résolution.
 
 \begin{figure}[!h]
     \centering
     \includegraphics[width= 400pt,valign=t]{"images/Image_inpainting/val0masque"}
-    \caption{Dans cet exemple de masque seul le cas en violet mènera à une valeur de 0 dans le masque.}
+    \caption{Dans cet exemple de masque seul le cas en violet mènera à une valeur de 0 dans le futur masque.}
 \end{figure}
 
 
 \subsection{Fonction de coût}
-La fonction de coût est divisé en quatres.
+La fonction de coût est composé de quatre parties.
 \subsubsection{Coût par pixel}
 Il s'agit d'une fonction qui mesure l'écart pixel à pixel. Une simple norme L1 qui assure que l'image ne diffère pas trop de l'original. Il s'agit de la fonction la plus intuitive. Si I est l'image, $L_{pixel} = ||I_{vrai} - {I_out}||_1$
 \subsubsection{Variation totale}
 Une fonction classique en traitement du signal qui vérifie que les écarts de valeurs ne sont pas trop brusques entre 2 pixels. Cela tend donc à "lisser" l'image.
 \subsubsection{VGG16}
-Le point intéressant de la fonction de coût est l'utilisation d'un deuxième réseau préentrainé pour la fonction de coût. Un VGG16 est un CNN pré-entrainé sur le dataset ImageNet qui permet d'identifier des features dans une image afin de déterminer ce qu'elle contient. L'idée est donc tout d'abord d'appliquer une loss pixel à pixel mais dans les espaces de features que VGG16 produit (sur une ou plusieurs couches). On passe donc l'image originale et celle reconstruite dans le VGG16, et on calcule la loss sur les espaces de features. Ainsi, si les deux images sont proches, on devrait obtenir les même features dans l'image et conserver des yeux par exemple. \\
-Une deuxième utilisation est faite des features de VGG16. On calcul la matrice de Gram des features produites par le VGG16. On obtient ainsi le "style" de l'image, c'est à dire son ton et sa texture. On applique ensuite une loss L1.
+Le point intéressant de la fonction de coût est l'utilisation d'un deuxième réseau préentrainé. Un VGG16 est un CNN pré-entrainé sur le dataset ImageNet qui permet d'identifier des features dans une image afin de déterminer ce qu'elle contient. L'idée est donc tout d'abord d'appliquer une loss pixel à pixel mais dans les espaces de features que VGG16 produit (sur une ou plusieurs couches). On passe donc l'image originale et celle reconstruite dans le VGG16, et on calcule la loss sur les espaces de features. Ainsi, si les deux images sont proches, on devrait obtenir les même features dans l'image et conserver des yeux par exemple. \\
+Une deuxième utilisation est faite des features de VGG16. On calcule la matrice de Gram des features produites par le VGG16. On obtient ainsi le "style" de l'image, c'est à dire son ton et sa texture. On applique ensuite une loss L1.
 
 \section{Conclusion}
-Cette section se voulait être une introduction au problème d'image inpainting et présenter dans les grandes lignes les spécificités réapplicables d'une architecture traitant ce sujet. Nous ne rentrons pas dans les détails, car le temps de calcul que demande cette méthode étant assez élevé (72h environ) et cette architecture n'étant pas l'objectif du projet, l'implémentation n'a pas été réalisé par nos soins. Il s'agissait donc de survoler la technologie et son fonctionnement. Maintenant que nous avons cerné le sujet et un point de comparaison pour notre cycleGAN, voyons comment nous pouvons l'adapter au problème.
+Cette section se voulait être une introduction au problème d'image inpainting et présenter dans les grandes lignes les spécificités réapplicables d'une architecture traitant ce sujet. Nous ne rentrons pas dans les détails, car le temps de calcul que demande cette méthode est assez élevé (72h environ) et cette architecture n'est pas l'objectif du projet, l'implémentation n'a pas été réalisé par nos soins. Il s'agissait donc de survoler la technologie et son fonctionnement. Maintenant que nous avons cerné le sujet et un point de comparaison pour notre cycleGAN, voyons comment nous pouvons l'adapter au problème.
 

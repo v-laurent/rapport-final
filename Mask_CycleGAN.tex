@@ -4,7 +4,7 @@
 
 \subsection{Les chambres}
 
-Afin de construire une base des données pour la tâche du Image-Painting nous avons amassé des images de chambres aléatoires du web. Ces images contiennent différents motifs et couleurs. 
+Afin de construire une base de données pour la tâche du Image-Painting nous avons scrappé des images de chambres. Ces images contiennent différents motifs et couleurs. Pour que le réseau ne surapprenne pas sur un type de chambre en particulier.
 
 \begin{figure}[!h]
     \centering
@@ -16,7 +16,7 @@ Afin de construire une base des données pour la tâche du Image-Painting nous a
 \end{figure}
 
 \subsection{Les masques}
-Puis nous avons créé un ensemble de masques détecté/détectable par le Mask-RCNN.
+Puis nous avons créé un ensemble de masques détecté/détectable à l'aide du Mask-RCNN réalisé précedemment.
 
 \begin{figure}[!h]
     \centering
@@ -28,7 +28,7 @@ Puis nous avons créé un ensemble de masques détecté/détectable par le Mask-
 \end{figure}
 
 \subsection{Superposition}
-Et finalement, nous avons superposé ces masques avec les images de chamres pour générer une base de données pour l'Image-painting.
+Et finalement, nous avons superposé ces masques avec les images de chambres pour générer une base de données pour l'Image-painting.
 
 \begin{figure}[H]
     \centering
@@ -40,7 +40,7 @@ Et finalement, nous avons superposé ces masques avec les images de chamres pour
 \end{figure}
 
 \section{Entrainement du CycleGAN}
-On lance l'entrainement de l'algorithme avec les même paramètres et hyper-paramètres qu'on a utilisé avant et on obtient les résultats suivants après une centaine d'epochs:
+On lance l'entrainement de l'algorithme avec les même paramètres et hyper-paramètres qu'on a utilisé au chapitre précédent et on obtient les résultats suivants après une centaine d'epochs:
 
 \begin{figure}[H]
     \centering
@@ -52,11 +52,11 @@ On lance l'entrainement de l'algorithme avec les même paramètres et hyper-para
 \end{figure}
 
 \section{Remarque et observations}
-On remarque que l'algorithme a bien compris la tâche qu'il doit effectuer, ce qui n'est pas assez évident parce que une le domaine des images avec une zones blaches (trous) peut se confendre avec le domaine des images en général. Pourtant l CycleGAN a pu localiser le trou et a essayé de trouver un motif ou floutage pour le remplir.
-On peut aussi remarquer que l'alorithme a modifié d'autres éléments de l'images et qu'il est confondu par des zones blanches parasites.
+On remarque que l'algorithme a bien compris la tâche qu'il doit effectuer, ce qui est loin d'être évident car le domaine des images avec une zones blanches (trous) peut se confondre avec un domaine d'images plus général. Pourtant le CycleGAN a pu localiser le trou et a essayé de trouver un motif ou floutage pour le remplir.
+On peut aussi remarquer que l'algorithme a modifié d'autres éléments de l'image et que des zones blanches naturellement dans l'image (i.e. ne faisant pas parti des trous) sont confondues avec les zones à remplir par l'algorithme.
 
 \section{Informations non-utilisées}
-En effet, même si les images ne sont toujours pas appairées, une nouvelle information peut être extraite des données ; c'est la distinction entre la zone sur lequel l'algrithme doit agir en particulier (la zone blanche créé par le masque) et celle qu'il ne doit pas toucher. On peut donc modifier la fonction de coût pour qu'elle prend en considération cette information pendant l'entrainement.
+En effet, même si les images ne sont toujours pas appairées, une nouvelle information peut être extraite des données ; c'est la distinction entre la zone sur lequel l'algorithme doit agir en particulier (la zone blanche créé par le masque) et celle qu'il ne doit pas toucher. Le mask-RCNN permettant d'obtenir ce masque, on peut donc modifier la fonction de coût pour qu'elle prend en considération cette information pendant l'entrainement. 
 
 \section{Nouvelle fonction de coût}
 La nouvelle fonction de coût est la même que l'originale mais on lui rajoute un terme qui ressemble au coût du cycle (l'image traversant un cycle de transformation doit être la même) mais pondérée par l'inverse du masque et restrictant la première transformation (demi cycle). Avec la fonction $\mathcal{L}_{\mathrm{demi_cyc}}(G, F)$ de la forme:
@@ -65,7 +65,7 @@ $$\mathbb{E}_{b \sim p_{\text {data}}(b)}\left[\|(G(b)-b)\cdot (1 - mask_b)\|_{1
 
 \section{Résultat final}
 
-Les résultats du derniers entrainement sont encxcore meilleurs:
+Les résultats du derniers entrainement sont encore meilleurs:
 
 \begin{figure}[H]
     \centering
