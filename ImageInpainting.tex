@@ -8,12 +8,12 @@ Ce problème trouve plusieurs applications concrètes : la restauration d'oeuvre
 \begin{figure}[!h]
     \centering
     \includegraphics[width= 400pt,valign=t]{"images/Image_inpainting/resolution"}
-    \caption{Exemple du procédé de dilatation pour augmente r la résolution. Ici réalisé par les chercheurs de Nvidia \cite{Nvidia inpainting}}
+    \caption{Exemple du procédé de dilatation pour augmente r la résolution. Ici réalisé par les chercheurs de Nvidia \cite{liu_image_2018}}
 \end{figure}
 
 Plusieurs techniques ont été développées pour travailler sur ce problème dont certaines non apprenantes comme PatchMatch. Nous étudierons ici deux aspects marquants de l'architecture développée par Nvidia qui pourraient être réutilisés dans d'autres projets.\\
 \section{Partial Convolution Inpainting}
-L'architecture développée est de type U-net. L'idée est par des convolutions partielles successives d'obtenir une sortie intermédiaire sans trous avant de remonter par des couches de NearestUpSample à une image de la bonne taille. La structure détaillée se trouve dans l'appendix du papier. \cite{Nvidia inpainting}
+L'architecture développée est de type U-net. L'idée est par des convolutions partielles successives d'obtenir une sortie intermédiaire sans trous avant de remonter par des couches de NearestUpSample à une image de la bonne taille. La structure détaillée se trouve dans l'appendix du papier. \cite{liu_image_2018}
 \subsection{Convolution partielle}
 L'idée principale du papier est donc cette convolution partielle. 
 On considère les pixels \textbf{X} et un masque \textbf{M} binaire de même taille que \textbf{X} tel que $M_{ij} = 0$ si le pixel est à compléter et $M_{ij} = 1$ sinon. Soit $\textbf{1}$ la matrice composée uniquement de 1 et de la même taille que M. Soit enfin $\odot$ la multiplication terme à terme.
@@ -30,7 +30,7 @@ Dans le cas d'une vraie image, seul le coeur du masque peut se retrouver suffisa
 
 \begin{figure}[!h]
     \centering
-    \includegraphics[width= 400pt,valign=t]{"images/Image_inpainting/val0masque"}
+    \includegraphics{"images/Image_inpainting/val0masque"}
     \caption{Dans cet exemple de masque seul le cas en violet mènera à une valeur de 0 dans le futur masque.}
 \end{figure}
 
